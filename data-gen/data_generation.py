@@ -44,7 +44,7 @@ def update_system(x, v, m, dt, G):
         m:  (n,) array of masses
         dt: time step
         G:  gravitational constant
-    """    
+    """
     n = x.shape[0]
     assert x.shape == (n, 2) and v.shape == (n, 2) and m.shape == (n,)
     
@@ -93,16 +93,16 @@ def generate_timeline(x0, v0, m, G, dt, F):
 
 if __name__ == "__main__":
     # Generate a bunch of samples
-    F = 1024
+    F = 512
     dt = 0.1
-    G = 1
-    n_samples = 10**4
+    G = 20
+    n_samples = 10
 
     n = 512  # Number of particles
     width = 512
     height = 512
 
-    label = 0
+    os.makedirs("./data", exist_ok=True)
 
     for i in tqdm(range(n_samples), ncols=80):
         # Generate random positions
@@ -115,5 +115,4 @@ if __name__ == "__main__":
         m = torch.exp(torch.randn((n,)) + 1)
 
         timeline = generate_timeline(x0, v0, m, G, dt, F)
-
-        break
+        torch.save(timeline, f"{OUTPUT_DIR}/dt_{dt}_F_{F}_{i:>06}.pt")
