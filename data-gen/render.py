@@ -9,7 +9,7 @@ from tqdm import tqdm
 import imageio
 import os
 
-file = "dt_0.1_F_1024_000000.pt"
+file = "dt_0.1_F_512_000000.pt"
 
 timeline = torch.load(f"./data/{file}", weights_only=True)
 dt, G, m, X, _ = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
@@ -51,7 +51,7 @@ for i in tqdm(range(F), ncols=80):
 
 plt.close()
 
-print(f"Finished rendering, saving to GIF...")
+print(f"Finished rendering, saving to MP4...")
 
 # Save frames as an animated GIF with looping
-imageio.mimsave(f"./{os.path.basename(file).split('.')[0]}.gif", frames, fps=30, loop=0)
+imageio.mimsave(f"./{os.path.basename(file).rsplit('.', 1)[0]}.mp4", frames, fps=30) #, loop=0)

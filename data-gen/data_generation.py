@@ -22,7 +22,7 @@ def get_grav_acc(x, m, G):
     n = x.shape[0]
     assert x.shape == (n, 2) and m.shape == (n,)
 
-    epsilon = 5  # For buffering/smoothing effect
+    epsilon = 20  # For buffering/smoothing effect
 
     # Calculate pairwise displacement vectors (x_i - x_j)
     dx = x[:, None, :] - x[None, :, :]  # Shape: (n, n, 2)
@@ -76,7 +76,7 @@ def generate_timeline(x0, v0, m, G, dt, F):
     V = torch.zeros((F, n, 2)).to(device)
 
     X[0] = x0
-    V[0] = v0
+    # V[0] = v0
     m = m.to(device)
 
     for i in range(1, F):
@@ -85,18 +85,17 @@ def generate_timeline(x0, v0, m, G, dt, F):
     return {
         "dt": dt,
         "G": G,
-        "m": m,
-        "X": X,
-        "V": V
+        "m": m.cpu(),
+        "X": X.cpu(),
+        "V": V.cpu()
     }
 
 
 if __name__ == "__main__":
-    # Generate a bunch of samples
-    F = 512
-    dt = 0.1
-    G = 20
-    n_samples = 10
+    F = 512             # Frames per timeline
+    dt = 0.1            # Timestep per frame
+    G = 100             # Gravitational constant
+    n_samples = 10      # Number of timelines to generate
 
     n = 512  # Number of particles
     width = 512
@@ -109,10 +108,10 @@ if __name__ == "__main__":
         x0 = torch.hstack([torch.rand((n, 1)) * width, torch.rand((n, 1)) * height])
 
         # Generate random velocities
-        v0 = torch.randn((n, 2)) * 3
+        v0 = torch.randn((n, 2)) * 2
 
         # Generate random masses according to log scale
-        m = torch.exp(torch.randn((n,)) + 1)
+        m = torch.exp(torch.randn((n,)) * 0.5 + 1)
 
         timeline = generate_timeline(x0, v0, m, G, dt, F)
         torch.save(timeline, f"{OUTPUT_DIR}/dt_{dt}_F_{F}_{i:>06}.pt")
