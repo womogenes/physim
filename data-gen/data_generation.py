@@ -114,4 +114,4 @@ if __name__ == "__main__":
         m = torch.exp(torch.randn((n,)) * 0.5 + 1)
 
         timeline = generate_timeline(x0, v0, m, G, dt, F)
-        torch.save(timeline, f"{OUTPUT_DIR}/dt_{dt}_F_{F}_{i:>06}.pt")
+        torch.save(timeline, f"{OUTPUT_DIR}/n_{n}_dt_{dt}_F_{F}_{i:>06}.pt")
