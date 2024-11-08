@@ -8,4 +8,4 @@ ML-powered physics simulations.
 
 ## TODO
 
-- [ ] Write script to visualize data in `data-gen/data`
+- [x] Write script to visualize data in `data-gen/data`

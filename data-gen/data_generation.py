@@ -3,12 +3,12 @@ import torch
 import datetime as dt
 import os
 
-
 OUTPUT_DIR = os.path.abspath("./data")
-
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using torch device: {device}")
+
+WIDTH, HEIGHT = 512, 512
 
 torch.manual_seed(0)
 
@@ -62,6 +62,8 @@ def update_system(x, v, m, dt, G):
 def generate_timeline(x0, v0, m, G, dt, F):
     """
     Generate one timeline of frames for gravity simulation.
+
+    arguments:
         x0: (n, 2) array of initial positions
         v0: (n, 2) array of initial velocities
         m:  (n,) array of masses
@@ -91,6 +93,37 @@ def generate_timeline(x0, v0, m, G, dt, F):
     }
 
 
+
+
+def voxelize_timeline(timeline):
+    """
+    Converts point-cloud timeline to voxelized timeline.
+    Output is (F, width, height, 4) tensor. Each (F, width, height)
+        slice contains a 4-vector of features:
+            [0] net x-momentum
+            [1] net y-momentum
+            [2] net mass
+            [3] number of particles
+
+    arguments:
+        timeline: {
+            "dt": dt,
+            "G": "G",
+            "m": (n,) array
+            "X": (F, n, 2) array
+            "V": (F, n, 2) array
+        }
+    """
+    dt, G, m, X, V = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
+    F, n, _ = X.shape
+
+    p_x = X[:,:,0] * m[None,:]  # x-momentum, (F, n)
+    p_y = X[:,:,1] * m[None,:]  # y-momentum, (F, n)
+    m = m[None,None,:]          # masses, (1, 1, n)
+
+    p_x_hist = torch
+
+
 if __name__ == "__main__":
     F = 512             # Frames per timeline
     dt = 0.1            # Timestep per frame
@@ -98,14 +131,13 @@ if __name__ == "__main__":
     n_samples = 10      # Number of timelines to generate
 
     n = 512  # Number of particles
-    width = 512
-    height = 512
 
-    os.makedirs("./data", exist_ok=True)
+    data_dir = f"n_{n}_dt_{dt}_F_{F}"
+    os.makedirs(f"./data/{data_dir}", exist_ok=True)
 
     for i in tqdm(range(n_samples), ncols=80):
         # Generate random positions
-        x0 = torch.hstack([torch.rand((n, 1)) * width, torch.rand((n, 1)) * height])
+        x0 = torch.hstack([torch.rand((n, 1)) * WIDTH, torch.rand((n, 1)) * HEIGHT])
 
         # Generate random velocities
         v0 = torch.randn((n, 2)) * 2
@@ -113,5 +145,8 @@ if __name__ == "__main__":
         # Generate random masses according to log scale
         m = torch.exp(torch.randn((n,)) * 0.5 + 1)
 
+        # Generate timeline
         timeline = generate_timeline(x0, v0, m, G, dt, F)
-        torch.save(timeline, f"{OUTPUT_DIR}/n_{n}_dt_{dt}_F_{F}_{i:>06}.pt")
+        torch.save(timeline, f"{OUTPUT_DIR}/{data_dir}/cloud_n_{n}_dt_{dt}_F_{F}_{i:>06}.pt")
+
+        # Generate voxelized timeline

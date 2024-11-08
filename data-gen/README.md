@@ -8,13 +8,14 @@ Run `./data_generation.py` to create the `./data/` directory. It will generate a
 
 ```
 data-gen/data/
-  - n_512_dt_0.1_F_512_000000.pt
-  - n_512_dt_0.1_F_512_000001.pt
-  - n_512_dt_0.1_F_512_000002.pt
-  ...
+  n_512_dt_0.1_F_512/
+    - 000000.pt
+    - 000001.pt
+    - 000002.pt
+    ...
 ```
 
-Each file describes a timeline (i.e. a single run of $n$ particles). Filenames:
+Each file describes a timeline (i.e. a single run of $n$ particles). Components of the parent directory's name:
 
 - `n_512` means 512 particles
 - `dt_0.1` means the timestep is 0.1 per frame
