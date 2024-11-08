@@ -89,10 +89,44 @@ def generate_timeline(x0, v0, m, G, dt, F):
         "G": G,
         "m": m.cpu(),
         "X": X.cpu(),
-        "V": V.cpu()
+        "V": V.cpu(),
     }
 
 
+def points_to_histograms(X, weight, batch_size=64):
+    """
+    Vectorized histogram creation with batched frames to manage memory.
+        i.e. "fast batched histograms"
+    
+    arguments:
+        X:       (F, n, 2) tensor of positions across F frames
+        weight:  (F, n) tensor of weights
+        batch_size: number of frames to process at once
+    """
+    F, n, _ = X.shape
+    assert tuple(weight.shape) == (F, n), "Weights must be of shape (F, n)"
+    assert F % batch_size == 0
+    
+    result = torch.zeros(F, WIDTH * HEIGHT, device=X.device)
+    for i in range(0, F, batch_size):
+        batch_end = min(i + batch_size, F)
+
+        X_slice = X[i:batch_end]   # shape: (f, n, 2) where f = batch_end - i
+        mask = (0 <= X_slice[:,:,0]) & (X_slice[:,:,0] < WIDTH) \
+             & (0 <= X_slice[:,:,1]) & (X_slice[:,:,1] < HEIGHT)
+    
+        net_weight = torch.zeros(batch_size, HEIGHT * WIDTH)
+        
+        # Assign flattened indices
+        indices = (X_slice[:,:,0].long() * WIDTH + X_slice[:,:,1].long())  # shape: (f, n)
+        indices = torch.clamp(indices, 0, WIDTH * HEIGHT - 1)
+
+        net_weight.scatter_add_(1, indices, weight[i:batch_end] * mask)
+
+        # Add back to results, cutting out extra index
+        result[i:batch_end] += net_weight
+
+    return result.reshape((F, HEIGHT, WIDTH))
 
 
 def voxelize_timeline(timeline):
@@ -117,11 +151,23 @@ def voxelize_timeline(timeline):
     dt, G, m, X, V = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
     F, n, _ = X.shape
 
-    p_x = X[:,:,0] * m[None,:]  # x-momentum, (F, n)
-    p_y = X[:,:,1] * m[None,:]  # y-momentum, (F, n)
-    m = m[None,None,:]          # masses, (1, 1, n)
+    p_x = V[:,:,0] * m[None,:]                  # x-momentum, (F, n)
+    p_y = V[:,:,1] * m[None,:]                  # y-momentum, (F, n)
+    m = m                                       # masses, (n,)
+    ones = torch.ones((F, n))                   # to count objects, (F, n)
 
-    p_x_hist = torch
+    p_x_channel = points_to_histograms(X, weight=p_x)
+    p_y_channel = points_to_histograms(X, weight=p_y)
+    m_channel = points_to_histograms(X, weight=torch.broadcast_to(m[None,:], (F, n)))
+    count_channel = points_to_histograms(X, weight=ones)
+
+    result = torch.stack((p_x_channel, p_y_channel, m_channel, count_channel))
+    return {
+        "dt": dt,
+        "G": G,
+        "m": m,
+        "frames": result,
+    }
 
 
 if __name__ == "__main__":
@@ -133,7 +179,8 @@ if __name__ == "__main__":
     n = 512  # Number of particles
 
     data_dir = f"n_{n}_dt_{dt}_F_{F}"
-    os.makedirs(f"./data/{data_dir}", exist_ok=True)
+    os.makedirs(f"./data/{data_dir}/cloud", exist_ok=True)
+    os.makedirs(f"./data/{data_dir}/voxel", exist_ok=True)
 
     for i in tqdm(range(n_samples), ncols=80):
         # Generate random positions
@@ -146,7 +193,9 @@ if __name__ == "__main__":
         m = torch.exp(torch.randn((n,)) * 0.5 + 1)
 
         # Generate timeline
-        timeline = generate_timeline(x0, v0, m, G, dt, F)
-        torch.save(timeline, f"{OUTPUT_DIR}/{data_dir}/cloud_n_{n}_dt_{dt}_F_{F}_{i:>06}.pt")
+        cloud_timeline = generate_timeline(x0, v0, m, G, dt, F)
+        torch.save(cloud_timeline, f"{OUTPUT_DIR}/{data_dir}/cloud/{i:>06}.pt")
 
         # Generate voxelized timeline
+        voxel_timeline = voxelize_timeline(cloud_timeline)
+        torch.save(voxelize_timeline, f"{OUTPUT_DIR}/{data_dir}/voxel/{i:>06}.pt")

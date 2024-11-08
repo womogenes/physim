@@ -1,15 +1,11 @@
-# Render a data sample geneated by ./data_generation.py
+# Testing script for rendering sequence of frames represented as images (not point clouds)
 
-import torch
-import matplotlib.pyplot as plt
-from pprint import pprint
-import numpy as np
-import cv2
+import  matplotlib.pyplot as plt
 from tqdm import tqdm
-import imageio
-import os
+import torch
 
-file = "cloud_n_
+
+file = "dt_0.1_F_512_000000.pt"
 
 timeline = torch.load(f"./data/{file}", weights_only=True)
 dt, G, m, X, _ = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
@@ -30,13 +26,15 @@ frames = []
 fig, ax = plt.subplots(figsize=(5.12, 5.12), dpi=100)
 fig.patch.set_facecolor('black')
 
+F, _, _ = hist.shape
+
 for i in tqdm(range(F), ncols=80):
     x = X[i]
 
     ax.clear()
     ax.set_xlim(0, 512)
     ax.set_ylim(0, 512)
-    ax.scatter(x[:,0], x[:,1], color="white", s=sqrt_m)
+    ax.imshow(hist[i], cmap="Greys_r")
     plt.axis("off")
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
@@ -54,4 +52,4 @@ plt.close()
 print(f"Finished rendering, saving to MP4...")
 
 # Save frames as an animated GIF with looping
-imageio.mimsave(f"./{os.path.basename(file).rsplit('.', 1)[0]}.mp4", frames, fps=30) #, loop=0)
+imageio.mimsave(f"./test.mp4", frames, fps=30) #, loop=0)
