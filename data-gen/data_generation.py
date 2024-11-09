@@ -161,7 +161,7 @@ def voxelize_timeline(timeline):
     m_channel = points_to_histograms(X, weight=torch.broadcast_to(m[None,:], (F, n)))
     count_channel = points_to_histograms(X, weight=ones)
 
-    result = torch.stack((p_x_channel, p_y_channel, m_channel, count_channel))
+    result = torch.stack((p_x_channel, p_y_channel, m_channel, count_channel), dim=-1)
     return {
         "dt": dt,
         "G": G,
@@ -198,4 +198,4 @@ if __name__ == "__main__":
 
         # Generate voxelized timeline
         voxel_timeline = voxelize_timeline(cloud_timeline)
-        torch.save(voxelize_timeline, f"{OUTPUT_DIR}/{data_dir}/voxel/{i:>06}.pt")
+        torch.save(voxel_timeline, f"{OUTPUT_DIR}/{data_dir}/voxel/{i:>06}.pt")
