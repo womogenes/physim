@@ -161,7 +161,7 @@ def voxelize_timeline(timeline):
     m_channel = points_to_histograms(X, weight=torch.broadcast_to(m[None,:], (F, n)))
     count_channel = points_to_histograms(X, weight=ones)
 
-    result = torch.stack((p_x_channel, p_y_channel, m_channel, count_channel), dim=-1)
+    result = torch.stack((p_x_channel, p_y_channel, m_channel, count_channel), dim=1)
     return {
         "dt": dt,
         "G": G,

@@ -64,11 +64,11 @@ data = torch.load("path/to/data/dir/n_512_dt_0.1_F_512_/voxel/000000.pt")
     "dt": 0.1,
     "G": 100,
     "m": tensor(...)        # tensor of masses   shape: (n,)
-    "frames": tensor(...)   # tensor of images   shape: (F, WIDTH, HEIGHT, 4)
+    "frames": tensor(...)   # tensor of images   shape: (F, 4, WIDTH, HEIGHT)
 }
 ```
 
-The formamt of `data["frames"]` is as a sequence of `F` images, where each image is of dimension `WIDTH x HEIGHT` and has four channels. The channels are:
+The format of `data["frames"]` is as a sequence of `F` images, where each image is of dimension `WIDTH x HEIGHT` and has four channels (thus shape `4, WIDTH, HEIGHT`). The channels are:
 
 ```
 [0] net x-momentum in voxel
