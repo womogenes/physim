@@ -2,14 +2,14 @@
 
 import torch
 import matplotlib.pyplot as plt
-from pprint import pprint
 import numpy as np
 import cv2
 from tqdm import tqdm
 import imageio
-import os
+from pathlib import Path
 
-file = "cloud_n_
+
+file = "n_512_dt_0.1_F_512/cloud/000000.pt"
 
 timeline = torch.load(f"./data/{file}", weights_only=True)
 dt, G, m, X, _ = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
@@ -54,4 +54,4 @@ plt.close()
 print(f"Finished rendering, saving to MP4...")
 
 # Save frames as an animated GIF with looping
-imageio.mimsave(f"./{os.path.basename(file).rsplit('.', 1)[0]}.mp4", frames, fps=30) #, loop=0)
+imageio.mimsave(f"./{Path(file).stem}.mp4", frames, fps=30) #, loop=0)

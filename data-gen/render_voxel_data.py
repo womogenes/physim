@@ -3,17 +3,20 @@
 import  matplotlib.pyplot as plt
 from tqdm import tqdm
 import torch
+import numpy as np
+import cv2
+import imageio
+from pathlib import Path
 
 
-file = "dt_0.1_F_512_000000.pt"
+file = "n_512_dt_0.1_F_512/voxel/000000.pt"
 
 timeline = torch.load(f"./data/{file}", weights_only=True)
-dt, G, m, X, _ = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
+dt, G, m, frames = [timeline[key] for key in ["dt", "G", "m", "frames"]]
 
-X = X.cpu()
 sqrt_m = torch.sqrt(m)
 
-F, n, _ = X.shape
+F, n, _ = frames.shape
 # F is number of frames
 # n is number of particles
 
@@ -26,15 +29,13 @@ frames = []
 fig, ax = plt.subplots(figsize=(5.12, 5.12), dpi=100)
 fig.patch.set_facecolor('black')
 
-F, _, _ = hist.shape
-
 for i in tqdm(range(F), ncols=80):
-    x = X[i]
+    frame = frames[i]
 
     ax.clear()
     ax.set_xlim(0, 512)
     ax.set_ylim(0, 512)
-    ax.imshow(hist[i], cmap="Greys_r")
+    ax.imshow(frame[i], cmap="Greys_r")
     plt.axis("off")
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
@@ -50,6 +51,4 @@ for i in tqdm(range(F), ncols=80):
 plt.close()
 
 print(f"Finished rendering, saving to MP4...")
-
-# Save frames as an animated GIF with looping
-imageio.mimsave(f"./test.mp4", frames, fps=30) #, loop=0)
+imageio.mimsave(f"./{Path(file).stem}.mp4", frames, fps=30)
