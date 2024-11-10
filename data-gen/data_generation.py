@@ -8,7 +8,7 @@ OUTPUT_DIR = os.path.abspath("./data")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print(f"Using torch device: {device}")
 
-WIDTH, HEIGHT = 512, 512
+WIDTH, HEIGHT = 128, 128
 
 torch.manual_seed(0)
 
@@ -176,7 +176,7 @@ if __name__ == "__main__":
     G = 100             # Gravitational constant
     n_samples = 10      # Number of timelines to generate
 
-    n = 512  # Number of particles
+    n = 128             # Number of particles
 
     data_dir = f"n_{n}_dt_{dt}_F_{F}"
     os.makedirs(f"./data/{data_dir}/cloud", exist_ok=True)
