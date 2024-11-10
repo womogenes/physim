@@ -1,3 +1,6 @@
 data-gen/data
-data-gen/**.mp4
-data-gen/**.gif
+
+**/**.mp4
+**/**.gif
+
+**/__pycache__/*
