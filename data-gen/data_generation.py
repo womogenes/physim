@@ -174,7 +174,7 @@ if __name__ == "__main__":
     F = 512             # Frames per timeline
     dt = 0.1            # Timestep per frame
     G = 100             # Gravitational constant
-    n_samples = 10      # Number of timelines to generate
+    n_samples = 500     # Number of timelines to generate
 
     n = 128             # Number of particles
 
@@ -183,6 +183,9 @@ if __name__ == "__main__":
     os.makedirs(f"./data/{data_dir}/voxel", exist_ok=True)
 
     for i in tqdm(range(n_samples), ncols=80):
+        if os.path.exists(f"{OUTPUT_DIR}/{data_dir}/cloud/{i:>06}.pt"):
+            continue
+
         # Generate random positions
         x0 = torch.hstack([torch.rand((n, 1)) * WIDTH, torch.rand((n, 1)) * HEIGHT])
 
@@ -197,5 +200,5 @@ if __name__ == "__main__":
         torch.save(cloud_timeline, f"{OUTPUT_DIR}/{data_dir}/cloud/{i:>06}.pt")
 
         # Generate voxelized timeline
-        voxel_timeline = voxelize_timeline(cloud_timeline)
-        torch.save(voxel_timeline, f"{OUTPUT_DIR}/{data_dir}/voxel/{i:>06}.pt")
+        # voxel_timeline = voxelize_timeline(cloud_timeline)
+        # torch.save(voxel_timeline, f"{OUTPUT_DIR}/{data_dir}/voxel/{i:>06}.pt")
