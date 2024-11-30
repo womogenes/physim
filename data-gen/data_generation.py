@@ -22,15 +22,15 @@ def get_grav_acc(x, m, G):
     n = x.shape[0]
     assert x.shape == (n, 2) and m.shape == (n,)
 
-    epsilon = 20  # For buffering/smoothing effect
+    epsilon = 4  # For buffering/smoothing effect
 
     # Calculate pairwise displacement vectors (x_i - x_j)
-    dx = x[:, None, :] - x[None, :, :]  # Shape: (n, n, 2)
+    dx = x[:,None,:] - x[None,:,:]  # Shape: (n, n, 2)
     d = torch.norm(dx, dim=2)
 
-    mapped_masses = m[:, None].expand(n, n)
+    mapped_masses = m[:,None].expand(n, n)
 
-    F = G * dx * mapped_masses[:, :, None] / (d**3 + epsilon)[:, :, None]
+    F = G * dx * mapped_masses[:,:,None] / ((d**2 + epsilon**2)**1.5)[:,:,None]
     acc = torch.sum(F, dim=0) / m[:, None]
 
     return acc
