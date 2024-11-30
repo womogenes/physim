@@ -78,7 +78,7 @@ def generate_timeline(x0, v0, m, G, dt, F):
     V = torch.zeros((F, n, 2)).to(device)
 
     X[0] = x0
-    # V[0] = v0
+    V[0] = v0
     m = m.to(device)
 
     for i in range(1, F):
