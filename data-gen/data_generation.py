@@ -48,13 +48,14 @@ def update_system(x, v, m, dt, G):
     n = x.shape[0]
     assert x.shape == (n, 2) and v.shape == (n, 2) and m.shape == (n,)
     
-    # Update positions and velocities using Verlet integration
-    # https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
+    # Update positions and velocities using Leapfrog method
+    # https://en.wikipedia.org/wiki/Leapfrog_integration
     a = get_grav_acc(x, m, G)
 
-    x_new = x + v * dt + 0.5 * a * dt**2
+    v_new = v + a * 0.5
+    x_new = x + v_new * dt
     a_new = get_grav_acc(x_new, m, G)
-    v_new = v + 0.5 * (a + a_new) * dt
+    v_new = v + 0.5 * a_new
 
     return x_new, v_new
 
