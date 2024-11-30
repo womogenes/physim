@@ -34,8 +34,8 @@ for i in tqdm(range(F), ncols=80):
     x = X[i]
 
     ax.clear()
-    ax.set_xlim(0, 512)
-    ax.set_ylim(0, 512)
+    ax.set_xlim(0, 128)
+    ax.set_ylim(0, 128)
     ax.scatter(x[:,0], x[:,1], color="white", s=sqrt_m)
     plt.axis("off")
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)

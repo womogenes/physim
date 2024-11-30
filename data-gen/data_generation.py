@@ -48,8 +48,8 @@ def update_system(x, v, m, dt, G):
     n = x.shape[0]
     assert x.shape == (n, 2) and v.shape == (n, 2) and m.shape == (n,)
     
-    # Update positions and velocities using Leapfrog method
-    # https://en.wikipedia.org/wiki/Leapfrog_integration
+    # Update positions and velocities using Verlet integration
+    # https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
     a = get_grav_acc(x, m, G)
 
     v_new = v + a * 0.5
@@ -174,18 +174,18 @@ def voxelize_timeline(timeline):
 if __name__ == "__main__":
     F = 512             # Frames per timeline
     dt = 0.1            # Timestep per frame
-    G = 100             # Gravitational constant
-    n_samples = 500     # Number of timelines to generate
+    G = 20              # Gravitational constant
+    n_samples = 10      # Number of timelines to generate
 
-    n = 128             # Number of particles
+    n = 512             # Number of particles
 
-    data_dir = f"n_{n}_dt_{dt}_F_{F}"
+    data_dir = f"n_{n}_G_{G}_dt_{dt}_F_{F}_leapfrog"
     os.makedirs(f"./data/{data_dir}/cloud", exist_ok=True)
     os.makedirs(f"./data/{data_dir}/voxel", exist_ok=True)
 
     for i in tqdm(range(n_samples), ncols=80):
-        if os.path.exists(f"{OUTPUT_DIR}/{data_dir}/cloud/{i:>06}.pt"):
-            continue
+        # if os.path.exists(f"{OUTPUT_DIR}/{data_dir}/cloud/{i:>06}.pt"):
+        #     continue
 
         # Generate random positions
         x0 = torch.hstack([torch.rand((n, 1)) * WIDTH, torch.rand((n, 1)) * HEIGHT])
