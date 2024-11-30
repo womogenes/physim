@@ -22,7 +22,7 @@ def get_grav_acc(x, m, G):
     n = x.shape[0]
     assert x.shape == (n, 2) and m.shape == (n,)
 
-    epsilon = 4  # For buffering/smoothing effect
+    epsilon = 8  # For buffering/smoothing effect
 
     # Calculate pairwise displacement vectors (x_i - x_j)
     dx = x[:,None,:] - x[None,:,:]  # Shape: (n, n, 2)
