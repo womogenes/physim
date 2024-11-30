@@ -33,7 +33,7 @@ So-named because they describe the points in a point-cloud format. To load a fil
 
 ```py
 import torch
-data = torch.load("path/to/data/dir/n_512_dt_0.1_F_512_/cloud/000000.pt")
+data = torch.load("path/to/data/dir/n_512_G_20_dt_0.1_F_512_/cloud/000000.pt")
 ```
 
 `data` will be a dictionary of floats/tensors that describe the timeline. `n` is the number of particles, `dt` is the timestep, `F` is the length of the timeline in frames, and `G` is the gravitational constant:
@@ -41,38 +41,9 @@ data = torch.load("path/to/data/dir/n_512_dt_0.1_F_512_/cloud/000000.pt")
 ```py
 {
     "dt": 0.1,
-    "G": 100,
+    "G": 20,
     "m": tensor(...)  # tensor of masses        shape: (n,)
     "X": tensor(...)  # tensor of positions     shape: (F, n, 2)
     "V": tensor(...)  # tensor of velocities    shape: (F, n, 2)
 }
-```
-
-## Voxel files
-
-So-named because they describe the points as in image. To load a file using PyTorch:
-
-```py
-import torch
-data = torch.load("path/to/data/dir/n_512_dt_0.1_F_512_/voxel/000000.pt")
-```
-
-`data` will be a dictionary of floats/tensors that describe the timeline. `n` is the number of particles, `dt` is the timestep, `F` is the length of the timeline in frames, and `G` is the gravitational constant:
-
-```py
-{
-    "dt": 0.1,
-    "G": 100,
-    "m": tensor(...)        # tensor of masses   shape: (n,)
-    "frames": tensor(...)   # tensor of images   shape: (F, 4, WIDTH, HEIGHT)
-}
-```
-
-The format of `data["frames"]` is as a sequence of `F` images, where each image is of dimension `WIDTH x HEIGHT` and has four channels (thus shape `4, WIDTH, HEIGHT`). The channels are:
-
-```
-[0] net x-momentum in voxel
-[1] net y-momentum in voxel
-[2] net mass in cell
-[3] number of particles in cell
 ```

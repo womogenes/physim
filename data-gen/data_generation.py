@@ -52,10 +52,9 @@ def update_system(x, v, m, dt, G):
     # https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
     a = get_grav_acc(x, m, G)
 
-    v_new = v + 0.5 * a * dt
-    x_new = x + v_new * dt
+    x_new = x + v * dt + 0.5 * a * dt**2
     a_new = get_grav_acc(x_new, m, G)
-    v_new = v + 0.5 * a_new * dt
+    v_new = v + 0.5 * (a + a_new) * dt
 
     return x_new, v_new
 
@@ -130,47 +129,6 @@ def points_to_histograms(X, weight, batch_size=64):
     return result.reshape((F, HEIGHT, WIDTH))
 
 
-def voxelize_timeline(timeline):
-    """
-    Converts point-cloud timeline to voxelized timeline.
-    Output is (F, width, height, 4) tensor. Each (F, width, height)
-        slice contains a 4-vector of features:
-            [0] net x-momentum
-            [1] net y-momentum
-            [2] net mass
-            [3] number of particles
-
-    arguments:
-        timeline: {
-            "dt": dt,
-            "G": "G",
-            "m": (n,) array
-            "X": (F, n, 2) array
-            "V": (F, n, 2) array
-        }
-    """
-    dt, G, m, X, V = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
-    F, n, _ = X.shape
-
-    p_x = V[:,:,0] * m[None,:]                  # x-momentum, (F, n)
-    p_y = V[:,:,1] * m[None,:]                  # y-momentum, (F, n)
-    m = m                                       # masses, (n,)
-    ones = torch.ones((F, n))                   # to count objects, (F, n)
-
-    p_x_channel = points_to_histograms(X, weight=p_x)
-    p_y_channel = points_to_histograms(X, weight=p_y)
-    m_channel = points_to_histograms(X, weight=torch.broadcast_to(m[None,:], (F, n)))
-    count_channel = points_to_histograms(X, weight=ones)
-
-    result = torch.stack((p_x_channel, p_y_channel, m_channel, count_channel), dim=1)
-    return {
-        "dt": dt,
-        "G": G,
-        "m": m,
-        "frames": result,
-    }
-
-
 if __name__ == "__main__":
     F = 512             # Frames per timeline
     dt = 0.1            # Timestep per frame
@@ -179,9 +137,8 @@ if __name__ == "__main__":
 
     n = 512             # Number of particles
 
-    data_dir = f"n_{n}_G_{G}_dt_{dt}_F_{F}_leapfrog"
+    data_dir = f"n_{n}_G_{G}_dt_{dt}_F_{F}"
     os.makedirs(f"./data/{data_dir}/cloud", exist_ok=True)
-    os.makedirs(f"./data/{data_dir}/voxel", exist_ok=True)
 
     for i in tqdm(range(n_samples), ncols=80):
         # if os.path.exists(f"{OUTPUT_DIR}/{data_dir}/cloud/{i:>06}.pt"):
@@ -199,7 +156,3 @@ if __name__ == "__main__":
         # Generate timeline
         cloud_timeline = generate_timeline(x0, v0, m, G, dt, F)
         torch.save(cloud_timeline, f"{OUTPUT_DIR}/{data_dir}/cloud/{i:>06}.pt")
-
-        # Generate voxelized timeline
-        # voxel_timeline = voxelize_timeline(cloud_timeline)
-        # torch.save(voxel_timeline, f"{OUTPUT_DIR}/{data_dir}/voxel/{i:>06}.pt")
