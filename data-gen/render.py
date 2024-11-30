@@ -9,7 +9,7 @@ import imageio
 from pathlib import Path
 
 
-file = "n_512_dt_0.1_F_512/cloud/000000.pt"
+file = "n_512_G_20_dt_0.1_F_512/cloud/000000.pt"
 
 timeline = torch.load(f"./data/{file}", weights_only=True)
 dt, G, m, X, _ = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
@@ -54,4 +54,4 @@ plt.close()
 print(f"Finished rendering, saving to MP4...")
 
 # Save frames as an animated GIF with looping
-imageio.mimsave(f"./{Path(file).stem}.mp4", frames, fps=30) #, loop=0)
+imageio.mimsave(f"./n_{n}_G_{G}_dt_{dt}_F_{F}_{Path(file).stem}.mp4", frames, fps=30) #, loop=0)

@@ -52,10 +52,10 @@ def update_system(x, v, m, dt, G):
     # https://en.wikipedia.org/wiki/Verlet_integration#Velocity_Verlet
     a = get_grav_acc(x, m, G)
 
-    v_new = v + a * 0.5
+    v_new = v + 0.5 * a * dt
     x_new = x + v_new * dt
     a_new = get_grav_acc(x_new, m, G)
-    v_new = v + 0.5 * a_new
+    v_new = v + 0.5 * a_new * dt
 
     return x_new, v_new
 
