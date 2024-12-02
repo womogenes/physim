@@ -30,7 +30,8 @@ def get_grav_acc(x, m, G):
 
     mapped_masses = m[:,None].expand(n, n)
 
-    F = G * dx * mapped_masses[:,:,None] / ((d**2 + epsilon**2)**1.5)[:,:,None]
+    d3 = (d**2 + epsilon**2)**1.5
+    F = G * dx * mapped_masses[:,:,None] / d3[:,:,None]
     acc = torch.sum(F, dim=0) / m[:, None]
 
     return acc
