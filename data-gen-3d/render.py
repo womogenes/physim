@@ -8,7 +8,7 @@ import imageio
 from pathlib import Path
 
 
-file = "n_512_G_20_dt_0.1_F_512/cloud/000000.pt"
+file = "n_512_G_200_dt_0.1_F_512/cloud/000000.pt"
 
 timeline = torch.load(f"./data/{file}", weights_only=True)
 dt, G, m, X, _ = [timeline[key] for key in ["dt", "G", "m", "X", "V"]]
